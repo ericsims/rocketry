@@ -3,6 +3,7 @@
 // Accelerometer ADXL345
 #define ACC 0x53    //ADXL345 ACC address
 #define A_TO_READ (6)        //num of bytes we are going to read each time (two bytes for each axis)
+
 // Gyroscope ITG3200 
 #define GYRO 0x69 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
 #define G_SMPLRT_DIV 0x15
@@ -50,12 +51,12 @@ void loop(){
  
 
 void initAlt(){
+  Serial.println("Altimeter Initialization...");
   if(IIC_Read(0x0C) != 196)
-    Serial.println("i2c bad");
+    Serial.println("altimeter i2c bad");
  
   writeTo(ALT, 0x2D,0); //write altitude offset=0 (because calculation below is based on offset=0)
   //calculate sea level pressure by averaging a few readings
-  Serial.println("Pressure calibration...");
   float buff[4];
   for (byte i=0;i<4;i++){
     writeTo(ALT, 0x26, 0b00111011); //bit 2 is one shot mode, bits 4-6 are 128x oversampling
@@ -63,14 +64,10 @@ void initAlt(){
     delay(550); //wait for sensor to read pressure (512ms in datasheet)
     IIC_ReadData(); //read sensor data
     buff[i] = Baro_Read(); //read pressure
-    Serial.println(buff[i]);
   }
   float currpress=(buff[0]+buff[1]+buff[2]+buff[3])/4; //average over two seconds
- 
-  Serial.print("Current pressure: "); Serial.print(currpress); Serial.println(" Pa");
   //calculate pressure at mean sea level based on a given altitude
   float seapress = currpress/pow(1-ALTBASIS*0.0000225577,5.255877);
-  Serial.print("Sea level pressure: "); Serial.print(seapress); Serial.println(" Pa");
   Serial.print("Temperature: ");
   Serial.print(IICdata[3]+(float)(IICdata[4]>>4)/16); Serial.println(" C");
  
@@ -89,21 +86,24 @@ void initAlt(){
   delay(550); //wait for measurement
   IIC_ReadData(); //
   altsmooth=Alt_Read();
-  Serial.print("Altitude now: "); Serial.println(altsmooth);
-  Serial.println("Done.");
+  Serial.print("Altitude : "); Serial.println(altsmooth);
+  Serial.println("Altimeter Initializated!");
 }
 
 void initAcc() {
+  Serial.println("Accelerometer Initialization...");
   //Turning on the ADXL345
   writeTo(ACC, 0x2D, 0);      
   writeTo(ACC, 0x2D, 16);
   writeTo(ACC, 0x2D, 8);
   //by default the device is in +-2g range reading
+  Serial.println("Accelerometer Initialized!");
 }
  
  
  void initGyro()
 {
+  Serial.println("Gyroscope Initialization...");
   /*****************************************
   * ITG 3200
   * power management set to:
@@ -118,7 +118,8 @@ void initAcc() {
   writeTo(GYRO, G_PWR_MGM, 0x00);
   writeTo(GYRO, G_SMPLRT_DIV, 0x07); // EB, 50, 80, 7F, DE, 23, 20, FF
   writeTo(GYRO, G_DLPF_FS, 0x1E); // +/- 2000 dgrs/sec, 1KHz, 1E, 19
-  writeTo(GYRO, G_INT_CFG, 0x00);
+  writeTo(GYRO, G_INT_CFG, 0x00); 
+  Serial.println("Gyroscope Initialized...");
 }
 
 void getGyroscopeData(int * result)
