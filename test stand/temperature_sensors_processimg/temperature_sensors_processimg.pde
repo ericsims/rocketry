@@ -1,6 +1,7 @@
 import processing.serial.*;
 
 Serial arduino;
+PrintWriter output; 
 
 float angleX = 0 ;
 float angleY = 0 ;
@@ -9,10 +10,15 @@ float angleZ = 0 ;
 void setup() {
   size(1200, 600) ;
   
-  arduino = new Serial(this, "COM3", 9600);
+  arduino = new Serial(this, Serial.list()[1], 9600);
   arduino.bufferUntil('\n');
+  
+  output = createWriter("temp.txt"); 
+  
+  frameRate(4);
 }
 
+double seconds = 0;
 void draw() {
   background(255);
   translate(width/6, height/2);
@@ -35,7 +41,18 @@ void draw() {
   stroke(255, 0, 0);
   guage(height/4, angleZ);
 
-  println(angleX + "\t" + angleY + "\t" + angleZ);
+  String values = seconds + "\t" + angleX + "\t" + angleY + "\t" + angleZ;
+  
+  println(values);
+  output.println(values);
+  
+  seconds += 0.25;
+}
+
+void keyPressed() {
+  output.flush(); // Writes the remaining data to the file
+  output.close(); // Finishes the file
+  exit(); // Stops the program
 }
 
 void serialEvent (Serial arduino)
