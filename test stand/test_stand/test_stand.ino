@@ -9,8 +9,8 @@ long blinkInterval = 500;
 
 long engineStartTime = 0;
 boolean engineRunning = false;
-long engineBurnTime = 5000;
-long oxyDelayTime = 500;
+long engineBurnTime = 10000;
+long oxyDelayTime = 1000;
 long fuelDelayTime = 0;
 
 String inputString = "";
@@ -32,14 +32,18 @@ void loop()
 {
   unsigned long currentMillis = millis();
  
-  if(currentMillis - ledPreviousMillis > blinkInterval) {
-    ledPreviousMillis = currentMillis;
-    if (ledState == LOW)
-      ledState = HIGH;
-    else
-      ledState = LOW;
-    digitalWrite(ledPin, ledState);
+  if(engineRunning) {
+    ledState = HIGH;
+  } else {
+    if(currentMillis - ledPreviousMillis > blinkInterval) {
+      ledPreviousMillis = currentMillis;
+      if (ledState == LOW)
+        ledState = HIGH;
+      else
+        ledState = LOW;
+    }
   }
+  digitalWrite(ledPin, ledState);
   
   
   if (stringComplete) {
@@ -68,6 +72,17 @@ void loop()
     digitalWrite(fuelPin, LOW);
     digitalWrite(oxyPin, LOW);
   }
+  
+  Serial.print("Voltage:");
+  Serial.println(analogRead(0));
+  
+  Serial.print("Pressure0:");
+  Serial.println(9.9206 * (analogRead(1) - 125));
+  
+  Serial.print("Temp0:");
+  Serial.println(analogRead(2));
+  
+  delay(100);
 }
 
 void serialEvent() {
