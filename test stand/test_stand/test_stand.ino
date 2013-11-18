@@ -1,7 +1,7 @@
 const int ledPin =  13;
-const int fuelPin = 9;
+const int fuelPin = 11;
 const int airPin =  10;
-const int oxyPin =  11;
+const int oxyPin =  9;
 
 int ledState = LOW;
 long ledPreviousMillis = 0;

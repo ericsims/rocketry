@@ -25,7 +25,7 @@ void setup() {
   
   frameRate(4);
   
-  arduino = new Serial(this, Serial.list()[1], 9600);
+  arduino = new Serial(this, Serial.list()[0], 9600);
   arduino.bufferUntil('\n');
 }
 
